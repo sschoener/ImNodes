@@ -56,6 +56,7 @@ struct _DragConnectionPayload
     const char* SlotTitle = nullptr;
     /// Source slot kind.
     int SlotKind = 0;
+    void* SlotUserData = nullptr;
 };
 
 /// Node-slot combination.
@@ -102,6 +103,7 @@ struct _CanvasStateImpl
     {
         int Kind = 0;
         const char* Title = nullptr;
+        void* UserData = nullptr;
     } slot{};
     /// Node id which will be positioned at the mouse cursor on next frame.
     void* AutoPositionNodeId = nullptr;
@@ -112,10 +114,12 @@ struct _CanvasStateImpl
         void* InputNode = nullptr;
         /// Slot title of input node.
         const char* InputSlot = nullptr;
+        void* InputSlotUserData = nullptr;
         /// Node id of output node.
         void* OutputNode = nullptr;
         /// Slot title of output node.
         const char* OutputSlot = nullptr;
+        void* OutputSlotUserData = nullptr;
     } NewConnection{};
     /// Starting position of node selection rect.
     ImVec2 SelectionStart{};
@@ -627,13 +631,15 @@ bool IsNodeHovered()
     return gCanvas->_Impl->Node.ItemId == gCanvas->_Impl->HoveredNodeId;
 }
 
-bool GetNewConnection(void** input_node, const char** input_slot_title, void** output_node, const char** output_slot_title)
+bool GetNewConnection(void** input_node, const char** input_slot_title, void** input_user_data, void** output_node, const char** output_slot_title, void** output_user_data)
 {
     IM_ASSERT(gCanvas != nullptr);
     IM_ASSERT(input_node != nullptr);
     IM_ASSERT(input_slot_title != nullptr);
+    IM_ASSERT(input_user_data != nullptr);
     IM_ASSERT(output_node != nullptr);
     IM_ASSERT(output_slot_title != nullptr);
+    IM_ASSERT(output_user_data != nullptr);
 
     auto* canvas = gCanvas;
     auto* impl = canvas->_Impl;
@@ -642,8 +648,10 @@ bool GetNewConnection(void** input_node, const char** input_slot_title, void** o
     {
         *input_node = impl->NewConnection.InputNode;
         *input_slot_title = impl->NewConnection.InputSlot;
+        *input_user_data = impl->NewConnection.InputSlotUserData;
         *output_node = impl->NewConnection.OutputNode;
         *output_slot_title = impl->NewConnection.OutputSlot;
+        *output_user_data = impl->NewConnection.OutputSlotUserData;
         impl->NewConnection = {};
         return true;
     }
@@ -754,13 +762,14 @@ CanvasState* GetCurrentCanvas()
     return gCanvas;
 }
 
-bool BeginSlot(const char* title, int kind)
+bool BeginSlot(const char* title, int kind, void* userData)
 {
     auto* canvas = gCanvas;
     auto* impl = canvas->_Impl;
 
     impl->slot.Title = title;
     impl->slot.Kind = kind;
+    impl->slot.UserData = userData;
 
     ImGui::BeginGroup();
     return true;
@@ -811,14 +820,17 @@ void EndSlot()
             drag_data.NodeId = impl->Node.Id;
             drag_data.SlotKind = impl->slot.Kind;
             drag_data.SlotTitle = impl->slot.Title;
+            drag_data.SlotUserData = impl->slot.UserData;
 
             ImGui::SetDragDropPayload(drag_id, &drag_data, sizeof(drag_data));
 
             // Clear new connection info
             impl->NewConnection.InputNode = nullptr;
             impl->NewConnection.InputSlot = nullptr;
+            impl->NewConnection.InputSlotUserData = nullptr;
             impl->NewConnection.OutputNode = nullptr;
             impl->NewConnection.OutputSlot = nullptr;
+            impl->NewConnection.OutputSlotUserData = nullptr;
             canvas->_Impl->IgnoreConnections.clear();
         }
         ImGui::TextUnformatted(impl->slot.Title);
@@ -840,15 +852,19 @@ void EndSlot()
             {
                 impl->NewConnection.InputNode = drag_data->NodeId;
                 impl->NewConnection.InputSlot = drag_data->SlotTitle;
+                impl->NewConnection.InputSlotUserData = drag_data->SlotUserData;
                 impl->NewConnection.OutputNode = impl->Node.Id;
                 impl->NewConnection.OutputSlot = impl->slot.Title;
+                impl->NewConnection.OutputSlotUserData = impl->slot.UserData;
             }
             else
             {
                 impl->NewConnection.InputNode = impl->Node.Id;
                 impl->NewConnection.InputSlot = impl->slot.Title;
+                impl->NewConnection.InputSlotUserData = impl->slot.UserData;
                 impl->NewConnection.OutputNode = drag_data->NodeId;
                 impl->NewConnection.OutputSlot = drag_data->SlotTitle;
+                impl->NewConnection.OutputSlotUserData = drag_data->SlotUserData;
             }
             impl->JustConnected = true;
             canvas->_Impl->IgnoreConnections.clear();

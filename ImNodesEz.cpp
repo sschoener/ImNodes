@@ -232,7 +232,7 @@ void EndNode()
     g.NodeSplitter.Merge(draw_list);
 }
 
-bool Slot(const char* title, int kind, ImVec2 &pos)
+bool Slot(const char* title, int kind, ImVec2 &pos, void* userData)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
@@ -247,7 +247,7 @@ bool Slot(const char* title, int kind, ImVec2 &pos)
 
     pos.y += ImMax(title_size.y, 2*CIRCLE_RADIUS) + g.Style.ItemSpacing.y;
 
-    if (ImNodes::BeginSlot(title, kind))
+    if (ImNodes::BeginSlot(title, kind, userData))
     {
         auto* draw_lists = ImGui::GetWindowDrawList();
 
@@ -319,7 +319,7 @@ void InputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos, slots[i].userData);
     }
     ImGui::EndGroup();
 
@@ -358,7 +358,7 @@ void OutputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos, slots[i].userData);
     }
     ImGui::EndGroup();
 
