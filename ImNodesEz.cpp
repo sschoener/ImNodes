@@ -382,7 +382,7 @@ void PushStyleVar(ImNodesStyleVar idx, float val)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
-    float *var;
+    float *var{};
     switch (idx)
     {
     case ImNodesStyleVar_GridSpacing: var = &g.State.Style.GridSpacing; break;
@@ -400,7 +400,7 @@ void PushStyleVar(ImNodesStyleVar idx, const ImVec2& val)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
-    ImVec2 *var;
+    ImVec2 *var{};
     switch (idx)
     {
     case ImNodesStyleVar_NodeSpacing: var = &g.State.Style.NodeSpacing; break;
