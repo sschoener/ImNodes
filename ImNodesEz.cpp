@@ -232,7 +232,7 @@ void EndNode()
     g.NodeSplitter.Merge(draw_list);
 }
 
-bool Slot(const char* title, int kind, ImVec2 &pos, void* userData)
+bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
@@ -290,6 +290,13 @@ bool Slot(const char* title, int kind, ImVec2 &pos, void* userData)
         if (ImNodes::IsInputSlotKind(kind))
         {
             ImGui::SameLine(0.0f, g.Style.ItemSpacing.x);
+            if (useLink)
+            {
+                bool b = *useLink != 0;
+                if (ImGui::Checkbox("## PropertySwitch", &b))
+                    *useLink = b ? 1 : 0;
+                ImGui::SameLine(0.0f, g.Style.ItemSpacing.x);
+            }
             ImGui::TextUnformatted(title);
         }
 
@@ -319,7 +326,7 @@ void InputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos, slots[i].userData);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr);
     }
     ImGui::EndGroup();
 
@@ -358,7 +365,7 @@ void OutputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos, slots[i].userData);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr);
     }
     ImGui::EndGroup();
 
