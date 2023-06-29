@@ -341,6 +341,40 @@ void InputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
 }
 
+ImVec2 BeginInputSlots()
+{
+    IM_ASSERT(GContext != nullptr);
+    Context &g = *GContext;
+    ImGuiStorage *storage = ImGui::GetStateStorage();
+
+    PushStyleVar(ImNodesStyleVar_ItemSpacing, g.Style.ItemSpacing * g.State.Zoom);
+    PushStyleVar(ImNodesStyleVar_NodeSpacing, g.State.Style.NodeSpacing * g.State.Zoom);
+
+    // Get cursor screen position to be updated by slots as they are rendered.
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+
+    // Render input slots
+    ImGui::BeginGroup();
+
+    return pos;
+}
+
+void EndInputSlots()
+{
+    ImGui::EndGroup();
+
+    ImGuiStorage *storage = ImGui::GetStateStorage();
+    storage->SetFloat(ImGui::GetID("input-width"), ImGui::GetItemRectSize().x);
+
+    // Move cursor to the next column
+    ImGui::SetCursorScreenPos(ImVec2{ storage->GetFloat(ImGui::GetID("content-x")), storage->GetFloat(ImGui::GetID("body-y")) });
+
+    PopStyleVar(2);
+
+    // Begin region for node content
+    ImGui::BeginGroup();
+}
+
 void OutputSlots(const SlotInfo* slots, int snum)
 {
     IM_ASSERT(GContext != nullptr);
@@ -369,6 +403,40 @@ void OutputSlots(const SlotInfo* slots, int snum)
     }
     ImGui::EndGroup();
 
+    storage->SetFloat(ImGui::GetID("output-width"), ImGui::GetItemRectSize().x);
+
+    PopStyleVar(2);
+}
+
+ImVec2 BeginOutputSlots()
+{
+    IM_ASSERT(GContext != nullptr);
+    Context &g = *GContext;
+    ImGuiStorage *storage = ImGui::GetStateStorage();
+
+    // End region of node content
+    ImGui::EndGroup();
+
+    PushStyleVar(ImNodesStyleVar_ItemSpacing, g.Style.ItemSpacing * g.State.Zoom);
+    PushStyleVar(ImNodesStyleVar_NodeSpacing, g.State.Style.NodeSpacing * g.State.Zoom);
+
+    storage->SetFloat(ImGui::GetID("content-width"), ImGui::GetItemRectSize().x);
+    // Get cursor screen position to be updated by slots as they are rendered.
+    ImVec2 pos = ImVec2{ storage->GetFloat(ImGui::GetID("output-x")), storage->GetFloat(ImGui::GetID("body-y")) };
+
+    // Set cursor screen position as it is recorded as the starting point in BeginGroup() for the item rect size.
+    ImGui::SetCursorScreenPos(pos);
+
+	// Render output slots in the next column
+	ImGui::BeginGroup();
+    return pos;
+}
+
+void EndOutputSlots()
+{
+    ImGui::EndGroup();
+
+    ImGuiStorage *storage = ImGui::GetStateStorage();
     storage->SetFloat(ImGui::GetID("output-width"), ImGui::GetItemRectSize().x);
 
     PopStyleVar(2);

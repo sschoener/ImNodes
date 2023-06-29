@@ -111,10 +111,16 @@ IMGUI_API void EndNode();
 /// This function must always be called after BeginNode() and before OutputSlots().
 /// When no input slots are rendered call InputSlots(nullptr, 0);
 IMGUI_API void InputSlots(const SlotInfo* slots, int snum);
+IMGUI_API ImVec2 BeginInputSlots();
+IMGUI_API void EndInputSlots();
 /// Renders output slot region. Kind is unique value whose sign is ignored. This function must always be called after InputSlots() and function call is required (not optional).
 /// This function must always be called after InputSlots() and before EndNode().
 /// When no input slots are rendered call OutputSlots(nullptr, 0);
 IMGUI_API void OutputSlots(const SlotInfo* slots, int snum);
+IMGUI_API ImVec2 BeginOutputSlots();
+IMGUI_API void EndOutputSlots();
+
+IMGUI_API bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink);
 
 bool Connection(void* input_node, const char* input_slot, void* output_node, const char* output_slot);
 
