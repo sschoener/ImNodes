@@ -232,7 +232,7 @@ void EndNode()
     g.NodeSplitter.Merge(draw_list);
 }
 
-bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink)
+bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink, SlotCompatibilityCheck* slotCompatCheck)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
@@ -253,7 +253,7 @@ bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink
 
         // Slot appearance can be altered depending on curve hovering state.
         bool is_active = ImNodes::IsSlotCurveHovered() ||
-                         (ImNodes::IsConnectingCompatibleSlot() /*&& !IsAlreadyConnectedWithPendingConnection(title, kind)*/);
+                         (ImNodes::IsConnectingCompatibleSlot(slotCompatCheck) /*&& !IsAlreadyConnectedWithPendingConnection(title, kind)*/);
 
         ImColor color = GetStyleColorRef(is_active ? ImNodesStyleCol_ConnectionActive : ImNodesStyleCol_Connection);
 
@@ -301,7 +301,7 @@ bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink
         }
 
         ImGui::PopStyleColor();
-        ImNodes::EndSlot();
+        ImNodes::EndSlot(slotCompatCheck);
 
         // A dirty trick to place output slot circle on the border.
         ImGui::GetCurrentWindow()->DC.CursorMaxPos.x -= item_offset_x;
@@ -326,7 +326,7 @@ void InputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::InputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr, nullptr);
     }
     ImGui::EndGroup();
 
@@ -399,7 +399,7 @@ void OutputSlots(const SlotInfo* slots, int snum)
     ImGui::BeginGroup();
     {
         for (int i = 0; i < snum; i++)
-            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr);
+            ImNodes::Ez::Slot(slots[i].title, ImNodes::OutputSlotKind(slots[i].kind), pos, slots[i].userData, nullptr, nullptr);
     }
     ImGui::EndGroup();
 
@@ -427,8 +427,8 @@ ImVec2 BeginOutputSlots()
     // Set cursor screen position as it is recorded as the starting point in BeginGroup() for the item rect size.
     ImGui::SetCursorScreenPos(pos);
 
-	// Render output slots in the next column
-	ImGui::BeginGroup();
+    // Render output slots in the next column
+    ImGui::BeginGroup();
     return pos;
 }
 

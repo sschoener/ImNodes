@@ -775,7 +775,7 @@ bool BeginSlot(const char* title, int kind, void* userData)
     return true;
 }
 
-void EndSlot()
+void EndSlot(SlotCompatibilityCheck* slotCompatCheck)
 {
     auto* canvas = gCanvas;
     auto* impl = canvas->_Impl;
@@ -812,8 +812,7 @@ void EndSlot()
     if (ImGui::BeginDragDropSource())
     {
         auto* payload = ImGui::GetDragDropPayload();
-        char drag_id[32];
-        snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.Kind);
+        char drag_id[] = "new-node-connection-";
         if (payload == nullptr || !payload->IsDataType(drag_id))
         {
             _DragConnectionPayload drag_data{ };
@@ -837,16 +836,13 @@ void EndSlot()
         ImGui::EndDragDropSource();
     }
 
-    if (IsConnectingCompatibleSlot() && ImGui::BeginDragDropTarget())
+    if (IsConnectingCompatibleSlot(slotCompatCheck) && ImGui::BeginDragDropTarget())
     {
         // Accept drags from opposite type (input <-> output, and same kind)
-        char drag_id[32];
-        snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.Kind * -1);
-
+        char drag_id[] = "new-node-connection-";
         if (auto* payload = ImGui::AcceptDragDropPayload(drag_id))
         {
-            auto* drag_data = (_DragConnectionPayload*) payload->Data;
-
+            auto* drag_data = (_DragConnectionPayload*)payload->Data;
             // Store info of source slot to be queried by ImNodes::GetConnection()
             if (!IsInputSlotKind(impl->slot.Kind))
             {
@@ -904,7 +900,7 @@ bool IsSlotCurveHovered()
                                                    IsInputSlotKind(impl->slot.Kind)));
 }
 
-bool IsConnectingCompatibleSlot()
+bool IsConnectingCompatibleSlot(SlotCompatibilityCheck* slotCompatCheck)
 {
     IM_ASSERT(gCanvas != nullptr);
     auto* canvas = gCanvas;
@@ -918,9 +914,10 @@ bool IsConnectingCompatibleSlot()
             // Node can not connect to itself
             return false;
 
-        char drag_id[32];
-        snprintf(drag_id, sizeof(drag_id), "new-node-connection-%08X", impl->slot.Kind * -1);
+        char drag_id[] = "new-node-connection-";
         if (strcmp(drag_id, payload->DataType) != 0)
+            return false;
+        if ((impl->slot.Kind < 0) == (drag_payload->SlotKind < 0) || !slotCompatCheck(impl->slot.Kind, drag_payload->SlotKind))
             return false;
 
         for (int i = 0; i < impl->IgnoreConnections.size(); i++)

@@ -120,7 +120,7 @@ IMGUI_API void OutputSlots(const SlotInfo* slots, int snum);
 IMGUI_API ImVec2 BeginOutputSlots();
 IMGUI_API void EndOutputSlots();
 
-IMGUI_API bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink);
+IMGUI_API bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink, SlotCompatibilityCheck* slotCompatCheck);
 
 bool Connection(void* input_node, const char* input_slot, void* output_node, const char* output_slot);
 

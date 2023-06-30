@@ -72,6 +72,8 @@ struct IMGUI_API CanvasState
     ~CanvasState();
 };
 
+typedef bool SlotCompatibilityCheck(int kindA, int kindB);
+
 /// Create a node graph canvas in current window.
 IMGUI_API void BeginCanvas(CanvasState* canvas);
 /// Terminate a node graph canvas that was created by calling BeginCanvas().
@@ -108,11 +110,11 @@ inline bool BeginInputSlot(const char* title, int kind, void* userData) { return
 /// Begins slot region. Kind is unique value whose sign is ignored.
 inline bool BeginOutputSlot(const char* title, int kind, void* userData) { return BeginSlot(title, OutputSlotKind(kind), userData); }
 /// Rends rendering of slot. Call only if Begin*Slot() returned `true`.
-IMGUI_API void EndSlot();
+IMGUI_API void EndSlot(SlotCompatibilityCheck* slotCompatCheck);
 /// Returns `true` if curve connected to current slot is hovered. Call between `Begin*Slot()` and `EndSlot()`. In-progress
 /// connection is considered hovered as well.
 IMGUI_API bool IsSlotCurveHovered();
 /// Returns `true` when new slot is being created and current slot can be connected. Call between `Begin*Slot()` and `EndSlot()`.
-IMGUI_API bool IsConnectingCompatibleSlot();
+IMGUI_API bool IsConnectingCompatibleSlot(SlotCompatibilityCheck* slotCompatCheck);
 
 }   // namespace ImNodes
