@@ -106,7 +106,7 @@ IMGUI_API void EndCanvas();
 /// Begin rendering of node in a graph. Render node content when returns `true`.
 IMGUI_API bool BeginNode(void* node_id, const char* title, ImVec2* pos, bool* selected);
 /// Terminates current node. Should be called regardless of BeginNode() returns value.
-IMGUI_API void EndNode();
+IMGUI_API void EndNode(bool isDirty);
 /// Renders input slot region. Kind is unique value whose sign is ignored.
 /// This function must always be called after BeginNode() and before OutputSlots().
 /// When no input slots are rendered call InputSlots(nullptr, 0);

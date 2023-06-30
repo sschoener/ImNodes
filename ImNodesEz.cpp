@@ -184,7 +184,7 @@ bool BeginNode(void* node_id, const char* title, ImVec2* pos, bool* selected)
     return result;
 }
 
-void EndNode()
+void EndNode(bool isDirty)
 {
     IM_ASSERT(GContext != nullptr);
     Context &g = *GContext;
@@ -220,6 +220,20 @@ void EndNode()
     // Render title bar background
     ImU32 node_color = GetStyleColorU32(*g.NodeSelected ? ImNodesStyleCol_NodeTitleBarBgActive : hovered ? ImNodesStyleCol_NodeTitleBarBgHovered : ImNodesStyleCol_NodeTitleBarBg);
     draw_list->AddRectFilled(node_rect.Min, titlebar_end, node_color, g.State.Style.NodeRounding, ImDrawFlags_RoundCornersTop);
+	{
+		float CIRCLE_RADIUS = g.Style.SlotRadius * g.State.Zoom;
+		float titlebar_mid_y = (node_rect.Min.y + titlebar_end.y) / 2;
+		float spacing = titlebar_mid_y - node_rect.Min.y;
+		if (CIRCLE_RADIUS > spacing)
+			CIRCLE_RADIUS = spacing;
+		ImVec2 circle_center{ node_rect.Max.x - spacing, titlebar_mid_y };
+		ImU32 circle_color;
+		if (isDirty)
+			circle_color = ImGui::ColorConvertFloat4ToU32({ 1.0f, 1.0f, 0.0f, 1.0f });
+		else
+			circle_color = GetStyleColorU32(ImNodesStyleCol_NodeBodyBg);
+		draw_list->AddCircleFilled(circle_center, CIRCLE_RADIUS, circle_color);
+	}
 
     // Render body background
     node_color = GetStyleColorU32(*g.NodeSelected ? ImNodesStyleCol_NodeBodyBgActive : hovered ? ImNodesStyleCol_NodeBodyBgHovered : ImNodesStyleCol_NodeBodyBg);
