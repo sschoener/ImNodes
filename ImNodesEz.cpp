@@ -282,21 +282,42 @@ bool Slot(const char* title, int kind, ImVec2 &pos, void* userData, int* useLink
         float circle_offset_y = title_size.y / 2.f - CIRCLE_RADIUS;
         circle_rect.Min.y += circle_offset_y;
         circle_rect.Max.y += circle_offset_y;
-        draw_lists->AddCircleFilled(circle_rect.GetCenter(), CIRCLE_RADIUS, color);
+
+        if (useLink)
+        {
+            float prevY = ImGui::GetCursorPosY();
+            bool b = *useLink != 0;
+            if (ImGui::InvisibleButton("## Link Switch", circle_rect.GetSize()))
+            {
+                b = !b;
+                *useLink = b ? 1 : 0;
+            }
+            if (ImGui::IsItemHovered())
+            {
+                draw_lists->AddRectFilled(circle_rect.Min + ImVec2(3, 3), circle_rect.Max - ImVec2(2, 2), color);
+                draw_lists->AddRect(circle_rect.Min, circle_rect.Max, color);
+            }
+            else if (b)
+            {
+                draw_lists->AddRectFilled(circle_rect.Min, circle_rect.Max, color);
+            }
+            else
+            {
+                draw_lists->AddRect(circle_rect.Min, circle_rect.Max, color);
+            }
+            ImGui::SetCursorPosY(prevY);
+        }
+        else {
+            draw_lists->AddCircleFilled(circle_rect.GetCenter(), CIRCLE_RADIUS, color);
+        }
 
         ImGui::ItemSize(circle_rect.GetSize());
         ImGui::ItemAdd(circle_rect, ImGui::GetID(title));
 
         if (ImNodes::IsInputSlotKind(kind))
         {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 3);
             ImGui::SameLine(0.0f, g.Style.ItemSpacing.x);
-            if (useLink)
-            {
-                bool b = *useLink != 0;
-                if (ImGui::Checkbox("## PropertySwitch", &b))
-                    *useLink = b ? 1 : 0;
-                ImGui::SameLine(0.0f, g.Style.ItemSpacing.x);
-            }
             ImGui::TextUnformatted(title);
         }
 
